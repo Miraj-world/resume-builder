@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resume-builder.local/schemas/resume-document.schema.json",
+  "title": "Resume Document",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "workspaceId",
+    "opportunityId",
+    "professionalIdentityId",
+    "strategyId",
+    "versionId",
+    "countryConvention",
+    "nodes",
+    "validationState"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "workspaceId": { "type": "string", "minLength": 1 },
+    "opportunityId": { "type": "string", "minLength": 1 },
+    "professionalIdentityId": { "type": "string", "minLength": 1 },
+    "strategyId": { "type": "string", "minLength": 1 },
+    "versionId": { "type": "string", "minLength": 1 },
+    "countryConvention": { "const": "US" },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "validationState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["blockingIssues", "warnings"],
+      "properties": {
+        "blockingIssues": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 500 }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string", "maxLength": 500 }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "position", "content", "locked", "factIds", "children"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": {
+          "enum": [
+            "header",
+            "summary",
+            "section",
+            "experience",
+            "project",
+            "education",
+            "skill_group",
+            "bullet",
+            "custom"
+          ]
+        },
+        "position": { "type": "integer", "minimum": 0 },
+        "content": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "locked": { "type": "boolean" },
+        "factIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/node" }
+        }
+      }
+    }
+  }
+}

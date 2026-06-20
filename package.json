@@ -1,0 +1,35 @@
+{
+  "name": "resume-builder",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Evidence-backed, job-specific resume builder with a structured Career Vault.",
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "predev": "npm run build -w @resume-builder/contracts",
+    "dev": "concurrently -n web,api -c cyan,green \"npm run dev -w @resume-builder/web\" \"npm run dev -w @resume-builder/api\"",
+    "build": "npm run build -w @resume-builder/contracts && npm run build -w @resume-builder/web && npm run build -w @resume-builder/api && npm run build -w @resume-builder/worker && npm run build -w @resume-builder/companion",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "pretest": "npm run build -w @resume-builder/contracts",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "eslint apps packages",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "concurrently": "10.0.3",
+    "eslint": "10.5.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-react-refresh": "0.5.3",
+    "globals": "17.6.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.61.1"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@resume-builder/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --exclude dist/**"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.3",
+    "@fastify/multipart": "10.0.0",
+    "@resume-builder/contracts": "*",
+    "fastify": "5.8.5",
+    "mammoth": "1.12.0",
+    "pdf-parse": "2.4.5",
+    "pg": "^8.22.0",
+    "word-extractor": "1.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "26.0.0",
+    "@types/pg": "^8.20.0",
+    "tsx": "4.22.4",
+    "vitest": "4.1.9"
+  }
+}

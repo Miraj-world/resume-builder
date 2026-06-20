@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+
+# Builds and coverage
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
+secrets/
+credentials/
+
+# Local data and diagnostics
+.local/
+data/
+logs/
+*.log
+diagnostics/
+
+# IDE and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Desktop packaging
+apps/companion/out/
+apps/companion/release/

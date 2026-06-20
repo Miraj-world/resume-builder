@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resume-builder.local/schemas/resume-suggestion.schema.json",
+  "title": "Resume Suggestion",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "resumeDocumentId",
+    "baseVersionId",
+    "targetNodeId",
+    "operation",
+    "originalValue",
+    "proposedValue",
+    "reason",
+    "requirementIds",
+    "factIds",
+    "confidence",
+    "warnings",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "resumeDocumentId": { "type": "string", "minLength": 1 },
+    "baseVersionId": { "type": "string", "minLength": 1 },
+    "targetNodeId": { "type": "string", "minLength": 1 },
+    "operation": {
+      "enum": ["replace_text", "insert_after", "delete", "reorder", "replace_content"]
+    },
+    "originalValue": true,
+    "proposedValue": true,
+    "reason": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "requirementIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "factIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 500 }
+    },
+    "status": { "enum": ["pending", "accepted", "rejected", "modified", "stale"] }
+  }
+}

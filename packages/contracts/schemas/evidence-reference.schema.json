@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resume-builder.local/schemas/evidence-reference.schema.json",
+  "title": "Evidence Reference",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "sourceId",
+    "sourceKind",
+    "evidenceType",
+    "locator",
+    "confidence",
+    "observedAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "id": { "type": "string", "minLength": 1 },
+    "sourceId": { "type": "string", "minLength": 1 },
+    "sourceKind": {
+      "enum": [
+        "resume_pdf",
+        "resume_doc",
+        "linkedin_export",
+        "note",
+        "repository_upload",
+        "github_repository",
+        "local_companion",
+        "manual"
+      ]
+    },
+    "evidenceType": {
+      "enum": [
+        "text_span",
+        "document_field",
+        "repository_signal",
+        "user_confirmation",
+        "manual_entry"
+      ]
+    },
+    "locator": {
+      "type": "object",
+      "required": ["kind", "value"],
+      "properties": {
+        "kind": {
+          "enum": ["page", "section", "field", "relative_path", "detector", "manual"]
+        },
+        "value": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "observedAt": { "type": "string", "format": "date-time" },
+    "safeExcerpt": { "type": "string", "maxLength": 500 }
+  }
+}
