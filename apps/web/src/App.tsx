@@ -4,26 +4,39 @@ import { ProfessionalIdentitiesPage } from "./features/identities/ProfessionalId
 import { ConnectionsPage } from "./features/connections/ConnectionsPage";
 import { OpportunitiesPage } from "./features/opportunities/OpportunitiesPage";
 import { ResumeStudio } from "./features/resume/ResumeStudio";
-import type { AppView } from "./types/navigation";
+import type {
+  AppView,
+  NavigateTo,
+  NavigationOptions,
+  VaultSection
+} from "./types/navigation";
 
 export function App() {
   const [view, setView] = useState<AppView>("resume");
+  const [vaultSection, setVaultSection] = useState<VaultSection>("Review queue");
+
+  const navigate: NavigateTo = (nextView: AppView, options?: NavigationOptions) => {
+    if (nextView === "vault" && options?.vaultSection) {
+      setVaultSection(options.vaultSection);
+    }
+    setView(nextView);
+  };
 
   if (view === "vault") {
-    return <CareerVaultPage onNavigate={setView} />;
+    return <CareerVaultPage initialSection={vaultSection} onNavigate={navigate} />;
   }
 
   if (view === "identities") {
-    return <ProfessionalIdentitiesPage onNavigate={setView} />;
+    return <ProfessionalIdentitiesPage onNavigate={navigate} />;
   }
 
   if (view === "connections") {
-    return <ConnectionsPage onNavigate={setView} />;
+    return <ConnectionsPage onNavigate={navigate} />;
   }
 
   if (view === "opportunities") {
-    return <OpportunitiesPage onNavigate={setView} />;
+    return <OpportunitiesPage onNavigate={navigate} />;
   }
 
-  return <ResumeStudio onNavigate={setView} />;
+  return <ResumeStudio onNavigate={navigate} />;
 }

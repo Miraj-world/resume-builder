@@ -1,10 +1,10 @@
 import { BriefcaseBusiness } from "lucide-react";
 import { ManagementHeader } from "../../components/ManagementHeader";
 import { NavRail } from "../../components/NavRail";
-import type { AppView } from "../../types/navigation";
+import type { NavigateTo } from "../../types/navigation";
 
 interface OpportunitiesPageProps {
-  onNavigate: (view: AppView) => void;
+  onNavigate: NavigateTo;
 }
 
 export function OpportunitiesPage({ onNavigate }: OpportunitiesPageProps) {

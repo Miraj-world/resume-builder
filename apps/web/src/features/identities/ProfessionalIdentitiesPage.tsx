@@ -21,10 +21,10 @@ import {
   apiRequest,
   type ProfessionalIdentity
 } from "../../lib/api";
-import type { AppView } from "../../types/navigation";
+import type { NavigateTo } from "../../types/navigation";
 
 interface ProfessionalIdentitiesPageProps {
-  onNavigate: (view: AppView) => void;
+  onNavigate: NavigateTo;
 }
 
 interface IdentityDraft {
@@ -184,11 +184,11 @@ export function ProfessionalIdentitiesPage({
           const Icon = item.icon;
           return (
             <button
-              className={`secondary-nav-item${"selected" in item && item.selected ? " secondary-nav-item--selected" : ""}`}
+              className={`secondary-nav-item${item.label === "Identities" ? " secondary-nav-item--selected" : ""}`}
               type="button"
               key={item.label}
               onClick={() => {
-                if (item.label === "Review queue") onNavigate("vault");
+                if (item.label !== "Identities") onNavigate("vault", { vaultSection: item.label });
               }}
             >
               <Icon aria-hidden="true" size={18} strokeWidth={1.7} />

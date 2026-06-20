@@ -26,10 +26,11 @@ import {
   apiRequest,
   type VaultBootstrap
 } from "../../lib/api";
-import type { AppView } from "../../types/navigation";
+import type { NavigateTo, VaultSection } from "../../types/navigation";
 
 interface CareerVaultPageProps {
-  onNavigate: (view: AppView) => void;
+  initialSection: VaultSection;
+  onNavigate: NavigateTo;
 }
 
 type ReviewTab = "pending" | "accepted" | "conflicts";
@@ -190,8 +191,9 @@ function FactReviewRow({
   );
 }
 
-export function CareerVaultPage({ onNavigate }: CareerVaultPageProps) {
+export function CareerVaultPage({ initialSection, onNavigate }: CareerVaultPageProps) {
   const [vault, setVault] = useState<VaultBootstrap>(emptyVault);
+  const [activeSection, setActiveSection] = useState<VaultSection>(initialSection);
   const [tab, setTab] = useState<ReviewTab>("pending");
   const [selectedFactId, setSelectedFactId] = useState<string>();
   const [correctingFactId, setCorrectingFactId] = useState<string>();
@@ -311,7 +313,10 @@ export function CareerVaultPage({ onNavigate }: CareerVaultPageProps) {
       <ManagementHeader
         title="Career Vault"
         onAsk={() => setMessage("Ask the Vault will use only permitted Career Vault context.")}
-        onAddSource={() => textAreaRef.current?.focus()}
+        onAddSource={() => {
+          setActiveSection("Sources");
+          textAreaRef.current?.focus();
+        }}
       />
 
       <aside className="secondary-rail" aria-label="Career Vault sections">
@@ -319,11 +324,12 @@ export function CareerVaultPage({ onNavigate }: CareerVaultPageProps) {
           const Icon = item.icon;
           return (
             <button
-              className={`secondary-nav-item${"selected" in item && item.selected ? " secondary-nav-item--selected" : ""}`}
+              className={`secondary-nav-item${activeSection === item.label ? " secondary-nav-item--selected" : ""}`}
               type="button"
               key={item.label}
               onClick={() => {
                 if (item.label === "Identities") onNavigate("identities");
+                else setActiveSection(item.label);
               }}
             >
               <Icon aria-hidden="true" size={18} strokeWidth={1.7} />
@@ -338,11 +344,12 @@ export function CareerVaultPage({ onNavigate }: CareerVaultPageProps) {
 
       <main className="vault-workspace" id="main">
         <header className="workspace-intro">
-          <h2>Review important facts</h2>
-          <p>Confirm claims that could materially affect your resume.</p>
+          <h2>{activeSection === "Review queue" ? "Review important facts" : activeSection}</h2>
+          <p>{activeSection === "Review queue" ? "Confirm claims that could materially affect your resume." : "Explore the evidence-backed information in your Career Vault."}</p>
           <span aria-live="polite">{message}</span>
         </header>
 
+        {activeSection === "Review queue" ? <>
         <div className="review-tabs" role="tablist" aria-label="Fact review states">
           <button type="button" role="tab" aria-selected={tab === "pending"} onClick={() => setTab("pending")}>
             Needs review ({vault.summary.pendingReview})
@@ -397,6 +404,37 @@ export function CareerVaultPage({ onNavigate }: CareerVaultPageProps) {
             ))
           )}
         </div>
+        </> : (
+          <section className="vault-section-view" aria-label={`${activeSection} details`}>
+            {activeSection === "Overview" ? (
+              <div className="vault-metrics">
+                <article><strong>{vault.summary.sources}</strong><span>Sources</span></article>
+                <article><strong>{vault.summary.facts}</strong><span>Career facts</span></article>
+                <article><strong>{vault.summary.pendingReview}</strong><span>Needs review</span></article>
+                <article><strong>{vault.summary.autoAccepted + vault.summary.verified}</strong><span>Verified</span></article>
+              </div>
+            ) : null}
+            {activeSection === "Sources" ? (
+              <div className="vault-record-list">
+                {vault.sources.length === 0 ? <p>No sources yet. Use the import panel to add your first resume.</p> : vault.sources.map((source) => (
+                  <article key={source.id}><FileText aria-hidden="true" size={18} /><div><strong>{source.name}</strong><span>{source.kind.replaceAll("_", " ")} · {source.characterCount.toLocaleString()} characters</span></div></article>
+                ))}
+              </div>
+            ) : null}
+            {activeSection === "Experiences" || activeSection === "Projects" || activeSection === "Skills" ? (
+              <div className="vault-record-list">
+                {vault.facts.filter((fact) => activeSection === "Experiences" ? fact.predicate.startsWith("experience.") : activeSection === "Skills" ? fact.predicate.startsWith("skill.") : fact.subject.type === "project").length === 0 ? (
+                  <p>No {activeSection.toLowerCase()} have been extracted yet.</p>
+                ) : vault.facts.filter((fact) => activeSection === "Experiences" ? fact.predicate.startsWith("experience.") : activeSection === "Skills" ? fact.predicate.startsWith("skill.") : fact.subject.type === "project").map((fact) => (
+                  <article key={fact.id}><ShieldCheck aria-hidden="true" size={18} /><div><strong>{factLabel(fact)}</strong><span>{factValue(fact)}</span></div></article>
+                ))}
+              </div>
+            ) : null}
+            {activeSection === "Private context" ? (
+              <div className="private-context-note"><LockKeyhole aria-hidden="true" size={22} /><div><strong>Private context stays guidance-only</strong><p>Sensitive notes can shape strategy but are never eligible for resume claims or export.</p></div></div>
+            ) : null}
+          </section>
+        )}
       </main>
 
       <aside className="import-panel" id="import-source" aria-label="Import source">

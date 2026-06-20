@@ -1,21 +1,26 @@
 import { LockKeyhole } from "lucide-react";
+import type { CSSProperties } from "react";
 import { brightlineBullets, northstarBullets } from "../data/resume";
 
 interface ResumeCanvasProps {
   selectedBullet: string;
   selected: boolean;
   atsPreview: boolean;
+  zoom: number;
 }
 
 export function ResumeCanvas({
   selectedBullet,
   selected,
-  atsPreview
+  atsPreview,
+  zoom
 }: ResumeCanvasProps) {
+  const zoomStyle = { "--resume-zoom": `${zoom}%` } as CSSProperties;
+
   if (atsPreview) {
     return (
       <main className="canvas-stage canvas-stage--ats" id="main" data-testid="resume-canvas">
-        <section className="ats-document" aria-label="ATS text preview">
+        <section className="ats-document" aria-label="ATS text preview" style={zoomStyle}>
           <header>
             <span>ATS text preview</span>
             <strong>Reading order and plain-text projection</strong>
@@ -43,7 +48,7 @@ University of Washington — B.S. in Computer Science`}</pre>
 
   return (
     <main className="canvas-stage" id="main" data-testid="resume-canvas">
-      <article className="resume-page" aria-label="Resume preview">
+      <article className="resume-page" aria-label="Resume preview" style={zoomStyle}>
         <header className="resume-header">
           <h1>Alex Morgan</h1>
           <p className="resume-role">Senior Product Engineer</p>

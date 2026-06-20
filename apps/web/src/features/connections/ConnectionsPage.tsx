@@ -18,10 +18,10 @@ import {
   apiRequest,
   type CredentialMetadata
 } from "../../lib/api";
-import type { AppView } from "../../types/navigation";
+import type { NavigateTo } from "../../types/navigation";
 
 interface ConnectionsPageProps {
-  onNavigate: (view: AppView) => void;
+  onNavigate: NavigateTo;
 }
 
 const connectionSections = [
@@ -31,7 +31,10 @@ const connectionSections = [
   { label: "Authorized repositories", icon: Database }
 ] as const;
 
+type ConnectionSection = (typeof connectionSections)[number]["label"];
+
 export function ConnectionsPage({ onNavigate }: ConnectionsPageProps) {
+  const [activeSection, setActiveSection] = useState<ConnectionSection>("AI providers");
   const [credentials, setCredentials] = useState<CredentialMetadata[]>([]);
   const [provider, setProvider] = useState<CredentialMetadata["provider"]>("openai");
   const [apiKey, setApiKey] = useState("");
@@ -103,8 +106,8 @@ export function ConnectionsPage({ onNavigate }: ConnectionsPageProps) {
       <NavRail selected="connections" onNavigate={onNavigate} />
       <ManagementHeader
         title="Connections"
-        onAsk={() => onNavigate("vault")}
-        onAddSource={() => onNavigate("vault")}
+        onAsk={() => onNavigate("vault", { vaultSection: "Overview" })}
+        onAddSource={() => onNavigate("vault", { vaultSection: "Sources" })}
       />
 
       <aside className="secondary-rail" aria-label="Connection types">
@@ -112,9 +115,13 @@ export function ConnectionsPage({ onNavigate }: ConnectionsPageProps) {
           const Icon = item.icon;
           return (
             <button
-              className={`secondary-nav-item${"selected" in item && item.selected ? " secondary-nav-item--selected" : ""}`}
+              className={`secondary-nav-item${activeSection === item.label ? " secondary-nav-item--selected" : ""}`}
               type="button"
               key={item.label}
+              onClick={() => {
+                setActiveSection(item.label);
+                setMessage(`Viewing ${item.label.toLowerCase()}.`);
+              }}
             >
               <Icon aria-hidden="true" size={18} strokeWidth={1.7} />
               <span>{item.label}</span>
@@ -125,11 +132,12 @@ export function ConnectionsPage({ onNavigate }: ConnectionsPageProps) {
 
       <main className="connections-workspace" id="main">
         <header className="workspace-intro">
-          <h2>AI providers</h2>
-          <p>Use your own provider key for resume analysis and generation.</p>
+          <h2>{activeSection}</h2>
+          <p>{activeSection === "AI providers" ? "Use your own provider key for resume analysis and generation." : "Review and manage this connection surface."}</p>
           <span aria-live="polite">{message}</span>
         </header>
 
+        {activeSection === "AI providers" ? <>
         <form className="credential-form" onSubmit={handleSubmit}>
           <label htmlFor="provider">Provider</label>
           <select
@@ -222,6 +230,19 @@ export function ConnectionsPage({ onNavigate }: ConnectionsPageProps) {
             ))
           )}
         </section>
+        </> : (
+          <section className="connection-placeholder" aria-label={`${activeSection} connection details`}>
+            {activeSection === "GitHub" ? <GitFork aria-hidden="true" size={28} /> : activeSection === "Companion devices" ? <Monitor aria-hidden="true" size={28} /> : <Database aria-hidden="true" size={28} />}
+            <h3>{activeSection}</h3>
+            <p>
+              {activeSection === "GitHub"
+                ? "GitHub OAuth is not connected yet. Existing Career Vault data remains available without repository access."
+                : activeSection === "Companion devices"
+                  ? "No Windows companion is paired with this local workspace."
+                  : "No repositories have been authorized for cloud inspection."}
+            </p>
+          </section>
+        )}
       </main>
 
       <aside className="credential-safety" aria-label="Credential safety">

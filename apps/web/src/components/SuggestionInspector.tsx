@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import {
   ChevronDown,
+  ChevronRight,
   Database,
   FileText,
   LockKeyhole,
@@ -16,6 +17,9 @@ interface SuggestionInspectorProps {
   onAccept: (value: string, modified: boolean) => void;
   onReject: () => void;
   onReset: () => void;
+  open: boolean;
+  onClose: () => void;
+  onOpen: () => void;
 }
 
 export function SuggestionInspector({
@@ -24,10 +28,27 @@ export function SuggestionInspector({
   state,
   onAccept,
   onReject,
-  onReset
+  onReset,
+  open,
+  onClose,
+  onOpen
 }: SuggestionInspectorProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(proposed);
+  const [activeTab, setActiveTab] = useState<"active" | "all">("active");
+  const [diffVisible, setDiffVisible] = useState(false);
+  const [cardExpanded, setCardExpanded] = useState(true);
+
+  if (!open) {
+    return (
+      <aside className="suggestion-panel suggestion-panel--collapsed" aria-label="Suggestions">
+        <button className="button button--quiet" type="button" onClick={onOpen}>
+          <ChevronRight aria-hidden="true" size={15} />
+          Show suggestions
+        </button>
+      </aside>
+    );
+  }
 
   if (state !== "pending") {
     const message =
@@ -41,7 +62,9 @@ export function SuggestionInspector({
       <aside className="suggestion-panel" aria-label="Suggestions">
         <div className="suggestion-panel__heading">
           <h2>Suggestions</h2>
-          <X aria-hidden="true" size={17} />
+          <button className="panel-close" type="button" aria-label="Close suggestions" onClick={onClose}>
+            <X aria-hidden="true" size={17} />
+          </button>
         </div>
         <div className="suggestion-result" aria-live="polite">
           <span className={`result-mark result-mark--${state}`} aria-hidden="true" />
@@ -67,27 +90,57 @@ export function SuggestionInspector({
     <aside className="suggestion-panel" aria-label="Suggestions">
       <div className="suggestion-panel__heading">
         <h2>Suggestions</h2>
-        <X aria-hidden="true" size={17} />
+        <button className="panel-close" type="button" aria-label="Close suggestions" onClick={onClose}>
+          <X aria-hidden="true" size={17} />
+        </button>
       </div>
 
       <div className="panel-tabs" role="tablist" aria-label="Suggestion views">
-        <button className="panel-tab panel-tab--active" type="button" role="tab" aria-selected="true">
+        <button
+          className={`panel-tab${activeTab === "active" ? " panel-tab--active" : ""}`}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "active"}
+          onClick={() => setActiveTab("active")}
+        >
           Active (1)
         </button>
-        <button className="panel-tab" type="button" role="tab" aria-selected="false">
+        <button
+          className={`panel-tab${activeTab === "all" ? " panel-tab--active" : ""}`}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "all"}
+          onClick={() => setActiveTab("all")}
+        >
           All suggestions (4)
         </button>
       </div>
 
+      {activeTab === "all" ? (
+        <div className="suggestion-history" role="tabpanel" aria-label="All suggestions">
+          <article><span className="pending-dot" /><div><strong>Bullet refinement</strong><p>Active · Experience</p></div></article>
+          <article><span className="history-dot" /><div><strong>Summary positioning</strong><p>Accepted · Summary</p></div></article>
+          <article><span className="history-dot" /><div><strong>Impact metric check</strong><p>Reviewed · Experience</p></div></article>
+          <article><span className="history-dot" /><div><strong>Skills ordering</strong><p>Deferred · Skills</p></div></article>
+        </div>
+      ) : (
       <section className="suggestion-card">
         <header className="suggestion-card__header">
           <span className="pending-dot" aria-hidden="true" />
           <strong>Bullet refinement</strong>
           <span>Pending</span>
-          <ChevronDown aria-hidden="true" size={15} />
+          <button
+            className="card-toggle"
+            type="button"
+            aria-label={cardExpanded ? "Collapse suggestion" : "Expand suggestion"}
+            aria-expanded={cardExpanded}
+            onClick={() => setCardExpanded((current) => !current)}
+          >
+            <ChevronDown aria-hidden="true" size={15} />
+          </button>
         </header>
 
-        <div className="suggestion-card__body">
+        {cardExpanded ? <div className="suggestion-card__body">
           <div className="suggestion-copy">
             <span>Original</span>
             <p>{original}</p>
@@ -122,10 +175,23 @@ export function SuggestionInspector({
             </div>
           )}
 
-          <button className="text-button" type="button">
-            Show diff
+          <button
+            className="text-button"
+            type="button"
+            aria-expanded={diffVisible}
+            onClick={() => setDiffVisible((current) => !current)}
+          >
+            {diffVisible ? "Hide diff" : "Show diff"}
             <ChevronDown aria-hidden="true" size={13} />
           </button>
+
+          {diffVisible ? (
+            <div className="suggestion-diff" aria-label="Suggestion diff">
+              <p><del>implemented a multi-tenant architecture</del></p>
+              <p><ins>designed a multi-tenant, event-driven architecture</ins></p>
+              <p><ins>with explicit data isolation and auditability</ins></p>
+            </div>
+          ) : null}
 
           <div className="suggestion-reason">
             <span>Why this helps</span>
@@ -158,9 +224,9 @@ export function SuggestionInspector({
               </div>
             </div>
           </section>
-        </div>
+        </div> : null}
 
-        {!editing ? (
+        {cardExpanded && !editing ? (
           <footer className="suggestion-actions">
             <button className="button button--quiet" type="button" onClick={onReject}>
               Reject
@@ -181,6 +247,7 @@ export function SuggestionInspector({
           </footer>
         ) : null}
       </section>
+      )}
     </aside>
   );
 }
